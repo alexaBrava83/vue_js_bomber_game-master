@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Гра «Бомбер»</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />-->
+
+    <meta property="og:title" content='Гра «Бомбер»' />
+    <meta property="og:image" content='/i/screen.png' />
+    
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="/assets/css/template.css?v=1534335036" />
+    <link rel="stylesheet" href="/assets/css/main.css?v=1531828532" />
+</head>
+<body>
+    <div id="bomber_game" class="bomber_game" v-cloak v-bind:style="{ width: (level.field_size * 52 + 50) + 'px' }">
+        
+        <div class="bomber_game_status_bar titlle">
+            <div class="bomber_game_status_bar_item" title="">Гра «Бомбер»</div>
+        </div>
+
+        <div class="bomber_game_status_bar" v-if="level">
+            <div class="bomber_game_status_bar_item" title="Рівень гри"><i class="fas fa-signal"></i> {{levels.indexOf(level) + 1}} / {{levels.length}} </div>
+            <div class="bomber_game_status_bar_item" title="Час гри"><i class="far fa-clock"></i> {{game_time_formated}}</div>
+            <div class="bomber_game_status_bar_item" title="Лишилось підірвати монстрів"><i class="fab fa-d-and-d red"></i> {{monsters_count}}</div>
+            <div class="bomber_game_status_bar_item" title="Кількість життів"><i class="fas fa-user-astronaut green"></i> {{lifes_count}}</div>
+            <div class="bomber_game_status_bar_item" title="Потужність вибуху"><i class="fas fa-certificate gold"></i> {{explode_power}}</div>
+            <div class="bomber_game_status_bar_item" title="Кількість бомб"><i class="fas fa-bomb"></i> {{bombs_count}}</div>
+        </div>
+
+        <div class="bomber_game_table" v-if="level">
+            <template v-for="row in level.field_size">
+                <div class="bomber_game_row">
+                    <div v-for="cell in level.field_size" class="cell"></div>
+                </div>
+            </template>
+        </div>
+
+        <div class="bomber_game_status_bar"  v-if="game_over">
+            <div class="bomber_game_status_bar_item">{{message}}</div>
+            <div class="bomber_game_status_bar_item bomber_game_status_bar_item_sep"> - </div>
+            <a class="bomber_game_status_bar_item green" href="#" @click.prevent="restart_game">Esc - почати з початку</a>
+        </div>
+        
+        <div class="bomber_mobile_gamepad" v-if="!game_over && show_mobile_gamepad">
+            <button class="bomber_mobile_gamepad_item bomber_mobile_gamepad_item__top" @click.prevent="move_top"></button>
+            <button class="bomber_mobile_gamepad_item bomber_mobile_gamepad_item__left" @click.prevent="move_left"></button>
+            <button class="bomber_mobile_gamepad_item bomber_mobile_gamepad_item__right" @click.prevent="move_right"></button>
+            <button class="bomber_mobile_gamepad_item bomber_mobile_gamepad_item__bottom" @click.prevent="move_bottom"></button>
+            <button class="bomber_mobile_gamepad_item bomber_mobile_gamepad_item__place_bomb" @click.prevent="place_bomb"><i class="fas fa-bomb"></i></button>
+        </div>
+
+        <!-- RULES -->
+        <div class="rules">
+            <h2  class="center">Керування</h2>
+
+
+            <p><strong>На компьютері</strong><br />
+                Ходити - стрілочками<br />
+                Поставити бомбу - пробіл</p>
+
+            <p><strong>На телефоні</strong><br />
+                Буде доступний геймпад з віртуальними кнопками управління
+            </p>
+
+            
+            <h2  class="center">Правила гри</h2>
+
+            <p>Суть гри полягає в тому, щоб знайти двері, відкрити їх і увійти в них - для цього потрібно всіх підірвати і не вибухнути самому.
+                <br />
+                <br />
+                У грі є 6 рівнів різної складності.</p>
+
+            <p><strong>Дракони</strong><br />
+                Червоні повзуючі штуки – це дракони – вони хочуть з'їсти вас :)</p>
+
+            <p><strong>Бонуси</strong><br />
+                У грі є різні бонуси: збільшення кількості бомб, сили вибуху і кількості життів - їх потрібно збирати.
+                 Вони з'являться десь на місці підірваної землі.
+            </p>
+
+            <p><strong>Двері</strong>
+                <br />
+                Двері з'являться десь на місці підірваної землі. Спочатку двері зачинені. Щоб відчинити двері – потрібно підірвати всіх драконів.
+                <br />
+                Вибух дверей призведе до появи додаткових драконів.&nbsp;</p>
+
+            <p><strong>Бот&nbsp;</strong><br />
+                Починаючи з 3-го рівня у грі з'явиться бот. Бот буде шкодити вам: підривати вас та двері.
+                З кожним рівнем бот ходить трохи швидше.
+                <br />
+                А також він може збирати ваші бонуси :)
+                <br />
+                <br />
+                Ви повинні підірвати бота.
+            </p>
+
+            <p><strong>Якщо ви програли</strong><br />
+                Повторна гра розпочнеться заново з поточного рівня, а не від початку :)
+                <br>
+                <br>
+                На комп'ютері - потрібно клікнути на &quot;Почати спочатку&quot; або натиснути клавішу Escape.
+                <br>
+                <br>
+                На телефоні гра почнеться заново сама.
+            </p>
+
+
+            <h2 class="center">Умовні позначення</h2>
+
+            <img src="/i/how_to.png" alt="how_to">
+
+            <p>1 - це ви<br />
+                2 - це бот<br />
+                3 - це дракон<br />
+                4 - це земля, її можна підірвати<br />
+                5 - це стіна, вона не вибухає<br />
+                6 - поточний рівень/всього рівнів<br />
+                7 - кількість драконів на полі<br />
+                8 - кількість ваших життів<br />
+                9 - сила вибуху ваших бомб (радіус)<br />
+                10 - кількість бомб, які можна поставити одночасно</p>
+        </div>
+    </div>
+    
+
+    <script src="/assets/js/plugins/jquery-3.3.1.slim.min.js?v=1531215842"></script>
+    <script src="/assets/js/plugins/vue-2.5.16.min.js?v=1531215842"></script>
+    <script src="/assets/js/tools.js?v=1531822722"></script>
+    <script src="/assets/js/bomber_game.js?v=1532042979"></script>
+    <script src="/assets/js/bomber.vue.js?v=1532042979"></script>
+
+   </body>
+</html>
